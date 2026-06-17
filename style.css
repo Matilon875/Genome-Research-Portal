@@ -55,17 +55,14 @@ body::before {
 header {
   padding: 42px 20px 10px;
   text-align: center;
-  position: relative;
-  z-index: 1;
 }
 
 h1 {
   margin: 0;
   font-size: clamp(2rem, 3vw, 3.5rem);
-  font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1.05;
-  color: #0f172a;
+  color: #1a2b44;
   text-shadow: none;
 }
 
@@ -230,7 +227,7 @@ button:active {
   padding: 11px 14px;
   border-radius: 999px;
   border: 1px solid rgba(19, 32, 51, 0.1);
-  z-index: 10030;
+  z-index: 9999;
 }
 
 #bibButton {
@@ -248,7 +245,7 @@ button:active {
   width: min(360px, calc(100vw - 36px));
   padding: 18px 18px 14px;
   border-radius: var(--radius-lg);
-  z-index: 9990;
+  z-index: 9999;
   backdrop-filter: blur(10px);
 }
 
@@ -265,7 +262,7 @@ button:active {
   position: fixed;
   right: 20px;
   bottom: 20px;
-  z-index: 10030;
+  z-index: 9999;
 }
 
 .guide-header button {
@@ -284,18 +281,13 @@ button:active {
 
 #guidePage {
   position: fixed;
-  top: 124px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 10010;
+  inset: 0;
+  z-index: 9998;
   padding: clamp(18px, 3vw, 34px);
   overflow-y: auto;
   background:
-    radial-gradient(circle at top left, rgba(47, 111, 235, 0.04), transparent 32%),
-    linear-gradient(180deg, rgba(246, 248, 252, 0.92), rgba(236, 241, 247, 0.96));
-  border-top-left-radius: 28px;
-  border-top-right-radius: 28px;
+    radial-gradient(circle at top left, rgba(47, 111, 235, 0.05), transparent 32%),
+    linear-gradient(180deg, rgba(246, 248, 252, 0.98), rgba(236, 241, 247, 0.96));
 }
 
 .guide-header {
@@ -337,7 +329,7 @@ button:active {
 
 button:focus-visible,
 input:focus-visible {
-  outline: 3px solid rgba(10, 10, 10, 0.45);
+  outline: 3px solid rgba(124, 196, 255, 0.45);
   outline-offset: 2px;
 }
 
