@@ -77,16 +77,97 @@ function toggleBibliography() {
 }
 
 /* =========================
+   📄 PAPER SEARCH
+========================= */
+async function searchPaper() {
+  const query = document.getElementById("paperInput").value.trim();
+  const output = document.getElementById("paperOutput");
+
+  if (!query) {
+    output.innerHTML = `
+      <div class="gene-card">
+        <p>❌ Por favor, escribe un tema, gen o autor</p>
+      </div>
+    `;
+    return;
+  }
+
+  output.innerHTML = `
+    <div class="gene-card">
+      <p>🔄 Buscando artículos en PubMed...</p>
+    </div>
+  `;
+
+  try {
+    const ids = await searchPubMedPapers(query, 5);
+
+    if (!ids.length) {
+      output.innerHTML = `
+        <div class="gene-card">
+          <h2>📄 Sin resultados</h2>
+          <p>No se encontraron artículos para "${query}".</p>
+        </div>
+      `;
+      return;
+    }
+
+    const papers = await getPubMedSummaries(ids);
+
+    output.innerHTML = `
+      <div class="paper-results">
+        ${papers.map((paper) => {
+          const authors = Array.isArray(paper.authors) && paper.authors.length
+            ? paper.authors.slice(0, 5).map((author) => author.name).join(", ")
+            : "Autores no disponibles";
+
+          const journal = paper.fulljournalname || paper.source || "Revista no disponible";
+          const pubDate = paper.pubdate || "Fecha no disponible";
+          const title = paper.title || "Sin título";
+          const pmidLink = `https://pubmed.ncbi.nlm.nih.gov/${paper.uid}/`;
+
+          return `
+            <article class="paper-card">
+              <h2>${title}</h2>
+              <p><strong>Autores:</strong> ${authors}</p>
+              <p><strong>Revista:</strong> ${journal}</p>
+              <p><strong>Fecha:</strong> ${pubDate}</p>
+              <a href="${pmidLink}" target="_blank" rel="noopener noreferrer">Ver en PubMed</a>
+            </article>
+          `;
+        }).join("")}
+      </div>
+    `;
+  } catch (error) {
+    output.innerHTML = `
+      <div class="gene-card">
+        <h2>❌ Error al buscar papers</h2>
+        <p>No se pudo conectar con PubMed en este momento.</p>
+      </div>
+    `;
+  }
+}
+
+/* =========================
    ⌨️ ENTER SEARCH
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("geneInput");
+  const paperInput = document.getElementById("paperInput");
 
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       searchGene();
     }
   });
+
+  if (paperInput) {
+    paperInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        searchPaper();
+      }
+    });
+  }
 });
 
 /* =========================
@@ -96,13 +177,35 @@ function openGuidePage() {
   document.querySelector(".container").style.display = "none";
   document.getElementById("guidePage").classList.remove("hidden");
   document.getElementById("bibButton").classList.add("hidden");
+  document.getElementById("paperButton").classList.add("hidden");
   document.getElementById("bibliographyPanel").classList.add("hidden");
+  document.getElementById("paperPage").classList.add("hidden");
 }
 
 function closeGuidePage() {
-  document.querySelector(".container").style.display = "block";
+  document.querySelector(".container").style.display = "flex";
   document.getElementById("guidePage").classList.add("hidden");
   document.getElementById("bibButton").classList.remove("hidden");
+  document.getElementById("paperButton").classList.remove("hidden");
+}
+
+/* =========================
+   📄 PAPER NAVIGATION
+========================= */
+function openPaperPage() {
+  document.querySelector(".container").style.display = "none";
+  document.getElementById("paperPage").classList.remove("hidden");
+  document.getElementById("bibButton").classList.add("hidden");
+  document.getElementById("paperButton").classList.add("hidden");
+  document.getElementById("bibliographyPanel").classList.add("hidden");
+  document.getElementById("guidePage").classList.add("hidden");
+}
+
+function closePaperPage() {
+  document.querySelector(".container").style.display = "flex";
+  document.getElementById("paperPage").classList.add("hidden");
+  document.getElementById("bibButton").classList.remove("hidden");
+  document.getElementById("paperButton").classList.remove("hidden");
 }
 
 /* =========================
