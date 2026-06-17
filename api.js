@@ -35,3 +35,32 @@ async function getGeneSummaryNCBI(id) {
 
   return data.result[id];
 }
+
+//////////////////////////////
+// 📄 PUBMED - BUSCAR PAPER
+//////////////////////////////
+
+async function searchPubMedPapers(query, retmax = 5) {
+  const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&retmode=json&retmax=${retmax}&sort=relevance`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+
+  return data.esearchresult?.idlist || [];
+}
+
+//////////////////////////////
+// 📄 PUBMED - DETALLES
+//////////////////////////////
+
+async function getPubMedSummaries(ids) {
+  if (!ids || !ids.length) return [];
+
+  const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${ids.join(",")}&retmode=json`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+  const result = data.result || {};
+
+  return ids.map((id) => result[id]).filter(Boolean);
+}
