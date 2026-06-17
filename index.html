@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal de Investigación Genómica</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <header>
+    <h1>Portal de Investigación Genómica</h1>
+  </header>
+
+  <div class="container">
+
+    <!-- 🔎 SEARCH -->
+   <form class="search-bar" onsubmit="event.preventDefault(); searchGene();">
+
+  <input
+    type="text"
+    id="geneInput"
+    placeholder="Escribe un gen (BRCA1, TP53...)"
+  >
+
+  <div class="button-row">
+
+    <button type="submit">
+      Buscar gen
+    </button>
+
+    <button type="button" onclick="openGuidePage()">
+      Información genómica
+    </button>
+
+  </div>
+
+</form>
+
+    <!-- 🧬 OUTPUT -->
+    <div id="output">
+      <p> Escribe un gen para comenzar la búsqueda</p>
+    </div>
+
+  </div>
+
+  <div class="top-right-buttons">
+
+  <button id="bibButton" onclick="toggleBibliography()">
+    Bibliografía
+  </button>
+
+
+</div>
+  <!-- 📚 PANEL BIBLIOGRAFÍA -->
+  <div id="bibliographyPanel" class="hidden">
+    <h3>Fuentes de datos</h3>
+    <ul>
+      <li>E-utilities de NCBI → https://eutils.ncbi.nlm.nih.gov</li>
+
+      <li>API REST de Ensembl → https://rest.ensembl.org</li>
+
+      <li>Navegador genómico de UCSC → https://api.genome.ucsc.edu</li>
+      
+      <li>API REST de UniProt → https://rest.uniprot.org</li>
+    </ul>
+  </div>
+
+  <!-- 📘 GUÍA DEL GENOMA -->
+  <div id="guidePage" class="hidden">
+
+    <div class="guide-header">
+      <button onclick="closeGuidePage()">⬅ Volver al buscador</button>
+      <h2>📘 Guía genética</h2>
+    </div>
+
+    <div class="guide-menu">
+
+      <button onclick="showSection('table')">
+    Cómo entender la tabla
+  </button>
+
+      <button onclick="showSection('location')">
+        Dónde se localizan los genomas
+      </button>
+
+      <button onclick="showSection('what')">
+        Qué es un genoma
+      </button>
+
+      <button onclick="showSection('ai')">
+        Más información (IA)
+      </button>
+
+    </div>
+
+    <div id="guideContent"></div>
+
+  </div>
+
+  <!-- ⚙️ SCRIPTS -->
+  <script src="api.js"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>
