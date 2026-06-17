@@ -9,6 +9,10 @@
 
 <body>
 
+  <button id="paperButton" onclick="openPaperPage()">
+    Papers e informes científicos
+  </button>
+
   <header>
     <h1>Portal de Investigación Genómica</h1>
   </header>
@@ -41,6 +45,40 @@
     <!-- 🧬 OUTPUT -->
     <div id="output">
       <p> Escribe un gen para comenzar la búsqueda</p>
+    </div>
+
+  </div>
+
+  <!-- 📄 PAPERS E INFORMES CIENTÍFICOS -->
+  <div id="paperPage" class="hidden">
+
+    <div class="guide-header">
+      <button onclick="closePaperPage()">⬅ Volver al buscador</button>
+      <h2>📄 Papers e informes científicos</h2>
+    </div>
+
+    <div class="container paper-container">
+
+      <form class="search-bar" onsubmit="event.preventDefault(); searchPaper();">
+
+        <input
+          type="text"
+          id="paperInput"
+          placeholder="Escribe un tema, gen o autor..."
+        >
+
+        <div class="button-row">
+          <button type="submit">
+            Buscar paper
+          </button>
+        </div>
+
+      </form>
+
+      <div id="paperOutput">
+        <p>Escribe una búsqueda para comenzar.</p>
+      </div>
+
     </div>
 
   </div>
