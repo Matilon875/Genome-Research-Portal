@@ -42,10 +42,8 @@
 
 </form>
 
-    <!-- 🧬 OUTPUT -->
-    <div id="output">
-      <p> Escribe un gen para comenzar la búsqueda</p>
-    </div>
+  <!-- 🧬 OUTPUT -->
+    <div id="output"></div>
 
   </div>
 
@@ -55,6 +53,18 @@
     <div class="guide-header">
       <button onclick="closePaperPage()">⬅ Volver al buscador</button>
       <h2>📄 Papers e informes científicos</h2>
+    </div>
+
+    <div class="paper-source-menu">
+      <button type="button" class="paper-source-button active" data-source="pubmed" onclick="setPaperSource('pubmed')">
+        PubMed
+      </button>
+      <button type="button" class="paper-source-button" data-source="pmc" onclick="setPaperSource('pmc')">
+        PubMed Central
+      </button>
+      <button type="button" class="paper-source-button" data-source="crossref" onclick="setPaperSource('crossref')">
+        Crossref
+      </button>
     </div>
 
     <div class="container paper-container">
@@ -76,7 +86,6 @@
       </form>
 
       <div id="paperOutput">
-        <p>Escribe una búsqueda para comenzar.</p>
       </div>
 
     </div>
@@ -95,12 +104,15 @@
   <div id="bibliographyPanel" class="hidden">
     <h3>Fuentes de datos</h3>
     <ul>
-      <li>E-utilities de NCBI → https://eutils.ncbi.nlm.nih.gov</li>
+      <li>PubMed / NCBI E-utilities → https://eutils.ncbi.nlm.nih.gov</li>
+      <li>PubMed Central (PMC) / NCBI → https://pmc.ncbi.nlm.nih.gov</li>
+      <li>NCBI Gene → https://www.ncbi.nlm.nih.gov/gene</li>
+      <li>ClinVar / NCBI → https://www.ncbi.nlm.nih.gov/clinvar</li>
+      <li>MedlinePlus Genetics / NIH → https://medlineplus.gov/genetics</li>
+      <li>NCBI Bookshelf / NIH → https://www.ncbi.nlm.nih.gov/books</li>
 
       <li>API REST de Ensembl → https://rest.ensembl.org</li>
-
       <li>Navegador genómico de UCSC → https://api.genome.ucsc.edu</li>
-      
       <li>API REST de UniProt → https://rest.uniprot.org</li>
     </ul>
   </div>
