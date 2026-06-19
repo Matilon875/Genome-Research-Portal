@@ -40,8 +40,8 @@ async function getGeneSummaryNCBI(id) {
 // 📄 PUBMED - BUSCAR PAPER
 //////////////////////////////
 
-async function searchPubMedPapers(query, retmax = 5) {
-  const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&retmode=json&retmax=${retmax}&sort=relevance`;
+async function searchNCBIPapers(query, retmax = 5, db = "pubmed") {
+  const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=${encodeURIComponent(db)}&term=${encodeURIComponent(query)}&retmode=json&retmax=${retmax}&sort=relevance`;
 
   const res = await fetch(url);
   const data = await res.json();
@@ -53,14 +53,43 @@ async function searchPubMedPapers(query, retmax = 5) {
 // 📄 PUBMED - DETALLES
 //////////////////////////////
 
-async function getPubMedSummaries(ids) {
+async function getNCBISummaries(ids, db = "pubmed") {
   if (!ids || !ids.length) return [];
 
-  const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${ids.join(",")}&retmode=json`;
+  const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=${encodeURIComponent(db)}&id=${ids.join(",")}&retmode=json`;
 
   const res = await fetch(url);
   const data = await res.json();
   const result = data.result || {};
 
   return ids.map((id) => result[id]).filter(Boolean);
+}
+
+async function searchPubMedPapers(query, retmax = 5) {
+  return searchNCBIPapers(query, retmax, "pubmed");
+}
+
+async function getPubMedSummaries(ids) {
+  return getNCBISummaries(ids, "pubmed");
+}
+
+async function searchPMCPapers(query, retmax = 5) {
+  return searchNCBIPapers(query, retmax, "pmc");
+}
+
+async function getPMCSummaries(ids) {
+  return getNCBISummaries(ids, "pmc");
+}
+
+//////////////////////////////
+// 📄 CROSSREF - BUSCAR PAPER
+//////////////////////////////
+
+async function searchCrossrefPapers(query, rows = 5) {
+  const url = `https://api.crossref.org/works?query=${encodeURIComponent(query)}&rows=${rows}&sort=relevance`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+
+  return data.message?.items || [];
 }
