@@ -1,4 +1,81 @@
 let aiUsed = false;
+let activePaperSource = "pubmed";
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function updatePaperSourceButtons() {
+  document.querySelectorAll(".paper-source-button").forEach((button) => {
+    button.classList.toggle("active", button.dataset.source === activePaperSource);
+  });
+}
+
+function setPaperSource(source) {
+  activePaperSource = source;
+  updatePaperSourceButtons();
+
+  const query = document.getElementById("paperInput")?.value.trim();
+  if (query) {
+    searchPaper();
+  }
+}
+
+function getPaperSourceLabel(source) {
+  if (source === "pmc") return "PubMed Central";
+  if (source === "crossref") return "Crossref";
+  return "PubMed";
+}
+
+function getCrossrefDate(item) {
+  if (item?.publishedPrint?.["date-parts"]?.[0]?.length) {
+    return item.publishedPrint["date-parts"][0].join("-");
+  }
+
+  if (item?.publishedOnline?.["date-parts"]?.[0]?.length) {
+    return item.publishedOnline["date-parts"][0].join("-");
+  }
+
+  if (item?.issued?.["date-parts"]?.[0]?.length) {
+    return item.issued["date-parts"][0].join("-");
+  }
+
+  return "Fecha no disponible";
+}
+
+function getArticleId(item, wantedTypes) {
+  const ids = Array.isArray(item?.articleids) ? item.articleids : [];
+
+  for (const wantedType of wantedTypes) {
+    const match = ids.find((entry) => {
+      const type = String(entry?.idtype || entry?.type || "").toLowerCase();
+      return type === wantedType;
+    });
+
+    if (match) {
+      return match.value || match.id || "";
+    }
+  }
+
+  return "";
+}
+
+function renderPaperCards(papers) {
+  return papers.map((paper) => `
+    <article class="paper-card">
+      <h2>${escapeHtml(paper.title)}</h2>
+      <p><strong>Autores:</strong> ${escapeHtml(paper.authors)}</p>
+      <p><strong>Revista:</strong> ${escapeHtml(paper.journal)}</p>
+      <p><strong>Fecha:</strong> ${escapeHtml(paper.pubDate)}</p>
+      <a href="${escapeHtml(paper.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(paper.linkLabel)}</a>
+    </article>
+  `).join("");
+}
 async function searchGene() {
 
   document.getElementById("output").innerHTML = `
@@ -82,6 +159,7 @@ function toggleBibliography() {
 async function searchPaper() {
   const query = document.getElementById("paperInput").value.trim();
   const output = document.getElementById("paperOutput");
+  const sourceLabel = getPaperSourceLabel(activePaperSource);
 
   if (!query) {
     output.innerHTML = `
@@ -94,54 +172,103 @@ async function searchPaper() {
 
   output.innerHTML = `
     <div class="gene-card">
-      <p>🔄 Buscando artículos en PubMed...</p>
+      <p>🔄 Buscando artículos en ${escapeHtml(sourceLabel)}...</p>
     </div>
   `;
 
   try {
-    const ids = await searchPubMedPapers(query, 5);
+    let papers = [];
 
-    if (!ids.length) {
+    if (activePaperSource === "pmc") {
+      const ids = await searchPMCPapers(query, 5);
+
+      if (ids.length) {
+        const rawPapers = await getPMCSummaries(ids);
+
+        papers = rawPapers.map((paper) => {
+          const pmcId = getArticleId(paper, ["pmc", "pmcid"]);
+          const pmcid = pmcId || (String(paper.uid || "").startsWith("PMC") ? paper.uid : `PMC${paper.uid || ""}`);
+          const authors = Array.isArray(paper.authors) && paper.authors.length
+            ? paper.authors.slice(0, 5).map((author) => author.name).join(", ")
+            : "Autores no disponibles";
+
+          return {
+            title: paper.title || "Sin título",
+            authors,
+            journal: paper.fulljournalname || paper.source || "Revista no disponible",
+            pubDate: paper.pubdate || "Fecha no disponible",
+            link: `https://pmc.ncbi.nlm.nih.gov/articles/${pmcid}/`,
+            linkLabel: "Ver en PubMed Central"
+          };
+        });
+      }
+    } else if (activePaperSource === "crossref") {
+      const items = await searchCrossrefPapers(query, 5);
+
+      papers = items.map((item) => {
+        const authors = Array.isArray(item.author) && item.author.length
+          ? item.author.slice(0, 5).map((author) => [author.given, author.family].filter(Boolean).join(" ")).join(", ")
+          : "Autores no disponibles";
+
+        const journal = Array.isArray(item["container-title"]) && item["container-title"].length
+          ? item["container-title"][0]
+          : item.publisher || "Revista no disponible";
+
+        const title = item.title?.[0] || "Sin título";
+        const doi = item.DOI ? `https://doi.org/${item.DOI}` : item.URL || "https://search.crossref.org/";
+
+        return {
+          title,
+          authors,
+          journal,
+          pubDate: getCrossrefDate(item),
+          link: doi,
+          linkLabel: "Ver registro"
+        };
+      });
+    } else {
+      const ids = await searchPubMedPapers(query, 5);
+
+      if (ids.length) {
+        const rawPapers = await getPubMedSummaries(ids);
+
+        papers = rawPapers.map((paper) => {
+          const authors = Array.isArray(paper.authors) && paper.authors.length
+            ? paper.authors.slice(0, 5).map((author) => author.name).join(", ")
+            : "Autores no disponibles";
+
+          return {
+            title: paper.title || "Sin título",
+            authors,
+            journal: paper.fulljournalname || paper.source || "Revista no disponible",
+            pubDate: paper.pubdate || "Fecha no disponible",
+            link: `https://pubmed.ncbi.nlm.nih.gov/${paper.uid}/`,
+            linkLabel: "Ver en PubMed"
+          };
+        });
+      }
+    }
+
+    if (!papers.length) {
       output.innerHTML = `
         <div class="gene-card">
           <h2>📄 Sin resultados</h2>
-          <p>No se encontraron artículos para "${query}".</p>
+          <p>No se encontraron artículos en ${escapeHtml(sourceLabel)} para "${escapeHtml(query)}".</p>
         </div>
       `;
       return;
     }
 
-    const papers = await getPubMedSummaries(ids);
-
     output.innerHTML = `
       <div class="paper-results">
-        ${papers.map((paper) => {
-          const authors = Array.isArray(paper.authors) && paper.authors.length
-            ? paper.authors.slice(0, 5).map((author) => author.name).join(", ")
-            : "Autores no disponibles";
-
-          const journal = paper.fulljournalname || paper.source || "Revista no disponible";
-          const pubDate = paper.pubdate || "Fecha no disponible";
-          const title = paper.title || "Sin título";
-          const pmidLink = `https://pubmed.ncbi.nlm.nih.gov/${paper.uid}/`;
-
-          return `
-            <article class="paper-card">
-              <h2>${title}</h2>
-              <p><strong>Autores:</strong> ${authors}</p>
-              <p><strong>Revista:</strong> ${journal}</p>
-              <p><strong>Fecha:</strong> ${pubDate}</p>
-              <a href="${pmidLink}" target="_blank" rel="noopener noreferrer">Ver en PubMed</a>
-            </article>
-          `;
-        }).join("")}
+        ${renderPaperCards(papers)}
       </div>
     `;
   } catch (error) {
     output.innerHTML = `
       <div class="gene-card">
         <h2>❌ Error al buscar papers</h2>
-        <p>No se pudo conectar con PubMed en este momento.</p>
+        <p>No se pudo conectar con ${escapeHtml(sourceLabel)} en este momento.</p>
       </div>
     `;
   }
@@ -153,6 +280,8 @@ async function searchPaper() {
 document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("geneInput");
   const paperInput = document.getElementById("paperInput");
+
+  updatePaperSourceButtons();
 
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
