@@ -329,7 +329,7 @@ button:active {
 
 button:focus-visible,
 input:focus-visible {
-  outline: 3px solid rgba(124, 196, 255, 0.45);
+  outline: 3px solid #7cc4ff73;
   outline-offset: 2px;
 }
 
@@ -411,4 +411,77 @@ input:focus-visible {
   .guide-header button {
     width: 100%;
   }
+}
+/* =========================
+   🔎 SEARCH BOX GENES + PAPERS
+========================= */
+
+.search-container {
+  margin-top: 20px;
+
+  padding: 18px;
+
+  border-radius: var(--radius-lg);
+
+  border: 1px solid var(--border);
+
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.95),
+    rgba(245,248,252,0.9)
+  );
+
+  box-shadow: var(--shadow-soft);
+}
+
+.search-title {
+  margin-bottom: 12px;
+
+  font-size: 1.1rem;
+  font-weight: 700;
+
+  color: #7cc4ff73
+}
+
+.search-container input {
+  width: 100%;
+
+  padding: 16px 18px;
+
+  border-radius: var(--radius-md);
+
+  border: 1px solid rgba(148,163,184,0.25);
+
+  background: white;
+
+  color: var(--text);
+
+  font-size: 1rem;
+}
+
+.search-container input:focus {
+  border-color: var(--border-strong);
+
+  box-shadow: 0 0 0 4px rgba(79,163,255,0.12);
+
+  transform: translateY(-1px);
+}
+
+.search-actions {
+  display: flex;
+  gap: 10px;
+
+  margin-top: 12px;
+}
+
+.search-actions button {
+  background: #eef3f9;
+
+  color: #7cc4ff73;
+
+  border: 1px solid rgba(19,32,51,0.08);
+}
+
+.search-actions button:hover {
+  background: #e4ebf5;
 }
